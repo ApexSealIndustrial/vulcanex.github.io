@@ -1,0 +1,2208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VULCANEX — Fil-Trek Production Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@300;400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0b;
+    --surface: #111114;
+    --surface2: #18181d;
+    --border: #2a2a35;
+    --accent: #ff4d00;
+    --accent2: #ff8c00;
+    --green: #00e676;
+    --yellow: #ffd600;
+    --red: #ff1744;
+    --blue: #00b0ff;
+    --text: #f0f0f0;
+    --text2: #888899;
+    --text3: #44445a;
+    --viton: #ff4d00;
+    --buna: #00b0ff;
+    --epdm: #00e676;
+    --font-display: 'Bebas Neue', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    --font-body: 'Inter', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* NOISE OVERLAY */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.4;
+  }
+
+  /* HEADER */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    height: 64px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+
+  .logo-text {
+    font-family: var(--font-display);
+    font-size: 32px;
+    letter-spacing: 4px;
+    color: var(--accent);
+    line-height: 1;
+    text-shadow: 0 0 30px rgba(255,77,0,0.4);
+  }
+
+  .logo-sub {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text2);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .shift-badge {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--green);
+    background: rgba(0,230,118,0.08);
+    border: 1px solid rgba(0,230,118,0.2);
+    padding: 4px 10px;
+    border-radius: 3px;
+    letter-spacing: 1px;
+  }
+
+  .live-clock {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--text2);
+    letter-spacing: 1px;
+  }
+
+  /* NAV TABS */
+  .nav {
+    display: flex;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    gap: 0;
+    overflow-x: auto;
+  }
+
+  .nav-tab {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text2);
+    padding: 14px 20px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: all 0.2s;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+  }
+
+  .nav-tab:hover { color: var(--text); }
+  .nav-tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  /* MAIN LAYOUT */
+  .main { padding: 24px; max-width: 1400px; margin: 0 auto; }
+
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* GRID */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+
+  /* CARDS */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .card:hover::before { opacity: 1; }
+
+  .card-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text2);
+    margin-bottom: 8px;
+  }
+
+  .card-value {
+    font-family: var(--font-display);
+    font-size: 48px;
+    line-height: 1;
+    color: var(--text);
+  }
+
+  .card-unit {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text2);
+    margin-top: 4px;
+  }
+
+  .card-accent-red .card-value { color: var(--accent); }
+  .card-accent-green .card-value { color: var(--green); }
+  .card-accent-blue .card-value { color: var(--blue); }
+  .card-accent-yellow .card-value { color: var(--yellow); }
+
+  /* SECTION TITLES */
+  .section-title {
+    font-family: var(--font-display);
+    font-size: 22px;
+    letter-spacing: 3px;
+    color: var(--text2);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* PRESS TIMER */
+  .press-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .press-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 24px;
+    position: relative;
+  }
+
+  .press-card.running {
+    border-color: var(--accent);
+    box-shadow: 0 0 20px rgba(255,77,0,0.15);
+  }
+
+  .press-card.done {
+    border-color: var(--green);
+    box-shadow: 0 0 20px rgba(0,230,118,0.15);
+  }
+
+  .press-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+  }
+
+  .press-name {
+    font-family: var(--font-display);
+    font-size: 28px;
+    letter-spacing: 3px;
+    color: var(--text2);
+  }
+
+  .press-status {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 2px;
+  }
+
+  .status-idle { color: var(--text3); background: rgba(68,68,90,0.2); border: 1px solid var(--text3); }
+  .status-running { color: var(--accent); background: rgba(255,77,0,0.1); border: 1px solid var(--accent); animation: pulse-border 1s ease-in-out infinite; }
+  .status-done { color: var(--green); background: rgba(0,230,118,0.1); border: 1px solid var(--green); }
+
+  @keyframes pulse-border { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+  .timer-display {
+    font-family: var(--font-display);
+    font-size: 72px;
+    line-height: 1;
+    text-align: center;
+    padding: 20px 0;
+    color: var(--text);
+    letter-spacing: 4px;
+    transition: color 0.3s;
+  }
+
+  .timer-display.running { color: var(--accent); }
+  .timer-display.done { color: var(--green); }
+  .timer-display.warning { color: var(--yellow); animation: flash 0.5s ease-in-out infinite; }
+
+  @keyframes flash { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  .timer-progress {
+    width: 100%;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    margin: 8px 0 16px;
+    overflow: hidden;
+  }
+
+  .timer-progress-bar {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 1s linear, background 0.3s;
+  }
+
+  .timer-progress-bar.done-bar { background: var(--green); }
+
+  .press-config {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .press-select {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 8px 10px;
+    border-radius: 3px;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+
+  .press-select:focus { border-color: var(--accent); }
+
+  .press-buttons { display: flex; gap: 8px; }
+
+  .btn {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 10px 16px;
+    border-radius: 3px;
+    cursor: pointer;
+    border: 1px solid;
+    transition: all 0.2s;
+    flex: 1;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  .btn-primary:hover { background: var(--accent2); border-color: var(--accent2); }
+
+  .btn-secondary {
+    background: transparent;
+    border-color: var(--border);
+    color: var(--text2);
+  }
+  .btn-secondary:hover { border-color: var(--text2); color: var(--text); }
+
+  .btn-success {
+    background: transparent;
+    border-color: var(--green);
+    color: var(--green);
+  }
+
+  .btn-danger {
+    background: transparent;
+    border-color: var(--red);
+    color: var(--red);
+  }
+
+  .btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  /* SUGGESTED TIME BADGE */
+  .suggested-time {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--accent2);
+    background: rgba(255,140,0,0.08);
+    border: 1px solid rgba(255,140,0,0.2);
+    padding: 3px 8px;
+    border-radius: 2px;
+    margin-bottom: 12px;
+    display: inline-block;
+  }
+
+  /* CUT LENGTH CALCULATOR */
+  .calc-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 2fr;
+    gap: 12px;
+    align-items: end;
+  }
+
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+
+  .form-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text2);
+  }
+
+  .form-input {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    padding: 10px 12px;
+    border-radius: 3px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .form-input:focus { border-color: var(--accent); }
+
+  .calc-result {
+    background: var(--surface2);
+    border: 1px solid var(--accent);
+    border-radius: 3px;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .calc-result-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text2);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .calc-result-value {
+    font-family: var(--font-display);
+    font-size: 28px;
+    color: var(--accent);
+    letter-spacing: 2px;
+  }
+
+  /* TABLES */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .data-table th {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text2);
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+  }
+
+  .data-table td {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text);
+    padding: 12px 14px;
+    border-bottom: 1px solid rgba(42,42,53,0.5);
+  }
+
+  .data-table tr:hover td { background: var(--surface2); }
+
+  .badge {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 1px;
+    padding: 2px 8px;
+    border-radius: 2px;
+    text-transform: uppercase;
+  }
+
+  .badge-viton { color: var(--viton); background: rgba(255,77,0,0.1); border: 1px solid rgba(255,77,0,0.3); }
+  .badge-buna { color: var(--buna); background: rgba(0,176,255,0.1); border: 1px solid rgba(0,176,255,0.3); }
+  .badge-epdm { color: var(--epdm); background: rgba(0,230,118,0.1); border: 1px solid rgba(0,230,118,0.3); }
+  .badge-pass { color: var(--green); background: rgba(0,230,118,0.08); border: 1px solid rgba(0,230,118,0.2); }
+  .badge-fail { color: var(--red); background: rgba(255,23,68,0.08); border: 1px solid rgba(255,23,68,0.2); }
+  .badge-pending { color: var(--yellow); background: rgba(255,214,0,0.08); border: 1px solid rgba(255,214,0,0.2); }
+
+  /* JOB QUEUE */
+  .job-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 16px;
+    display: grid;
+    grid-template-columns: auto 1fr auto auto;
+    gap: 16px;
+    align-items: center;
+    margin-bottom: 8px;
+    transition: border-color 0.2s;
+    cursor: pointer;
+  }
+
+  .job-item:hover { border-color: var(--text3); }
+  .job-item.active-job { border-color: var(--accent); background: rgba(255,77,0,0.03); }
+
+  .job-number {
+    font-family: var(--font-display);
+    font-size: 24px;
+    color: var(--text3);
+    width: 32px;
+    text-align: center;
+  }
+
+  .job-info-main {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .job-info-sub {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text2);
+    margin-top: 2px;
+  }
+
+  .job-qty {
+    font-family: var(--font-display);
+    font-size: 22px;
+    color: var(--text2);
+    text-align: right;
+  }
+
+  .job-qty-label {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-align: right;
+  }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 32px;
+    width: 480px;
+    max-width: 95vw;
+    position: relative;
+  }
+
+  .modal-title {
+    font-family: var(--font-display);
+    font-size: 26px;
+    letter-spacing: 3px;
+    color: var(--text);
+    margin-bottom: 24px;
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 16px; right: 16px;
+    background: none;
+    border: none;
+    color: var(--text2);
+    font-size: 20px;
+    cursor: pointer;
+    font-family: var(--font-mono);
+    line-height: 1;
+    padding: 4px 8px;
+  }
+  .modal-close:hover { color: var(--text); }
+
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .form-full { margin-bottom: 12px; }
+
+  /* STATS BAR */
+  .stat-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+
+  .stat-bar-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text2);
+    width: 80px;
+    flex-shrink: 0;
+  }
+
+  .stat-bar-track {
+    flex: 1;
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .stat-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.8s ease;
+  }
+
+  .stat-bar-value {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text);
+    width: 40px;
+    text-align: right;
+  }
+
+  /* SHIFT HANDOFF */
+  .handoff-textarea {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 14px;
+    border-radius: 3px;
+    outline: none;
+    resize: vertical;
+    min-height: 120px;
+    line-height: 1.6;
+    transition: border-color 0.2s;
+  }
+
+  .handoff-textarea:focus { border-color: var(--accent); }
+
+  /* PART NUMBER LOOKUP */
+  .part-search-container { position: relative; margin-bottom: 16px; }
+
+  .part-results {
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .part-result-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto auto auto;
+    gap: 16px;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+    cursor: pointer;
+  }
+
+  .part-result-row:last-child { border-bottom: none; }
+  .part-result-row:hover { background: var(--surface2); }
+
+  .part-num {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  /* NOTIFICATIONS */
+  .notif-container {
+    position: fixed;
+    top: 80px;
+    right: 24px;
+    z-index: 500;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    pointer-events: none;
+  }
+
+  .notif {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 12px 16px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text);
+    min-width: 280px;
+    animation: slideIn 0.3s ease;
+    pointer-events: all;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .notif.success { border-color: var(--green); }
+  .notif.warning { border-color: var(--yellow); }
+  .notif.error { border-color: var(--red); }
+  .notif.info { border-color: var(--accent); }
+
+  @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+  .notif-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .notif.success .notif-dot { background: var(--green); }
+  .notif.warning .notif-dot { background: var(--yellow); }
+  .notif.error .notif-dot { background: var(--red); }
+  .notif.info .notif-dot { background: var(--accent); }
+
+  /* SCRAP LOG */
+  .scrap-summary {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .scrap-stat {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 14px;
+    text-align: center;
+  }
+
+  .scrap-stat-val {
+    font-family: var(--font-display);
+    font-size: 36px;
+    color: var(--red);
+  }
+
+  .scrap-stat-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text2);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    .grid-4 { grid-template-columns: repeat(2, 1fr); }
+    .grid-3 { grid-template-columns: 1fr 1fr; }
+    .grid-2 { grid-template-columns: 1fr; }
+    .press-container { grid-template-columns: 1fr; }
+    .calc-grid { grid-template-columns: 1fr 1fr; }
+    .main { padding: 12px; }
+    .header { padding: 0 12px; }
+    .nav { padding: 0 8px; }
+    .job-item { grid-template-columns: auto 1fr auto; }
+  }
+
+  @media (max-width: 480px) {
+    .grid-4 { grid-template-columns: 1fr 1fr; }
+    .logo-sub { display: none; }
+    .timer-display { font-size: 52px; }
+    .calc-grid { grid-template-columns: 1fr; }
+  }
+
+  /* INVENTORY */
+  .inv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
+
+  .inv-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .inv-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 3px;
+  }
+
+  .inv-viton::after { background: var(--viton); }
+  .inv-buna::after { background: var(--buna); }
+  .inv-epdm::after { background: var(--epdm); }
+
+  .inv-material {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text2);
+    margin-bottom: 4px;
+  }
+
+  .inv-size {
+    font-family: var(--font-display);
+    font-size: 20px;
+    letter-spacing: 2px;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  .inv-qty-input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--font-display);
+    font-size: 28px;
+    padding: 6px 10px;
+    border-radius: 3px;
+    outline: none;
+    text-align: center;
+    letter-spacing: 2px;
+  }
+
+  .inv-qty-input:focus { border-color: var(--accent); }
+
+  .inv-unit {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--text3);
+    text-align: center;
+    margin-top: 4px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .inv-low { border-color: rgba(255,23,68,0.4); }
+  .inv-low::before {
+    content: '⚠ LOW';
+    position: absolute;
+    top: 8px; right: 8px;
+    font-family: var(--font-mono);
+    font-size: 8px;
+    color: var(--red);
+    letter-spacing: 1px;
+  }
+
+  /* SEPARATOR */
+  .mt-16 { margin-top: 16px; }
+  .mt-24 { margin-top: 24px; }
+  .mb-16 { margin-bottom: 16px; }
+  .mb-8 { margin-bottom: 8px; }
+
+  /* HANDOFF HISTORY */
+  .handoff-entry {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 3px;
+    padding: 16px;
+    margin-bottom: 10px;
+  }
+
+  .handoff-meta {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text2);
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+
+  .handoff-body {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text);
+    line-height: 1.7;
+    white-space: pre-wrap;
+  }
+
+  .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--green); margin-right: 6px; animation: blink 2s ease-in-out infinite; }
+  @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.2; } }
+</style>
+</head>
+<body>
+
+<!-- NOTIFICATIONS -->
+<div class="notif-container" id="notifContainer"></div>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="logo">
+    <span class="logo-text">VULCANEX</span>
+    <span class="logo-sub">Fil-Trek Production Intelligence</span>
+  </div>
+  <div class="header-right">
+    <span class="shift-badge"><span class="dot"></span>DAY SHIFT · 07:30–16:30</span>
+    <span class="live-clock" id="liveClock">--:--:--</span>
+  </div>
+</header>
+
+<!-- NAV -->
+<nav class="nav">
+  <button class="nav-tab active" onclick="switchPage('dashboard')">Dashboard</button>
+  <button class="nav-tab" onclick="switchPage('presses')">Press Timers</button>
+  <button class="nav-tab" onclick="switchPage('calculator')">Cut Length</button>
+  <button class="nav-tab" onclick="switchPage('jobs')">Job Queue</button>
+  <button class="nav-tab" onclick="switchPage('scrap')">Scrap Log</button>
+  <button class="nav-tab" onclick="switchPage('inventory')">Inventory</button>
+  <button class="nav-tab" onclick="switchPage('parts')">Part Lookup</button>
+  <button class="nav-tab" onclick="switchPage('handoff')">Shift Handoff</button>
+</nav>
+
+<main class="main">
+
+  <!-- ===== DASHBOARD ===== -->
+  <div id="page-dashboard" class="page active">
+    <div class="grid-4 mb-16">
+      <div class="card card-accent-green">
+        <div class="card-label">Today's Output</div>
+        <div class="card-value" id="dash-output">0</div>
+        <div class="card-unit">O-RINGS COMPLETED</div>
+      </div>
+      <div class="card card-accent-red">
+        <div class="card-label">Scrap Rate</div>
+        <div class="card-value" id="dash-scrap">0%</div>
+        <div class="card-unit">SPLICE FAILURES TODAY</div>
+      </div>
+      <div class="card card-accent-blue">
+        <div class="card-label">Jobs Completed</div>
+        <div class="card-value" id="dash-jobs">0</div>
+        <div class="card-unit">OF <span id="dash-total-jobs">0</span> QUEUED</div>
+      </div>
+      <div class="card card-accent-yellow">
+        <div class="card-label">Press Cycles</div>
+        <div class="card-value" id="dash-cycles">0</div>
+        <div class="card-unit">TOTAL TODAY</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div class="section-title">Press Status</div>
+        <div class="card mb-16" style="padding:16px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <span style="font-family:var(--font-mono);font-size:11px;color:var(--text2);">PRESS 1</span>
+            <span id="dash-p1-status" class="press-status status-idle">IDLE</span>
+          </div>
+          <div style="font-family:var(--font-display);font-size:36px;color:var(--text);" id="dash-p1-timer">--:--</div>
+          <div style="font-family:var(--font-mono);font-size:11px;color:var(--text2);margin-top:4px;" id="dash-p1-job">No active job</div>
+        </div>
+        <div class="card" style="padding:16px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <span style="font-family:var(--font-mono);font-size:11px;color:var(--text2);">PRESS 2</span>
+            <span id="dash-p2-status" class="press-status status-idle">IDLE</span>
+          </div>
+          <div style="font-family:var(--font-display);font-size:36px;color:var(--text);" id="dash-p2-timer">--:--</div>
+          <div style="font-family:var(--font-mono);font-size:11px;color:var(--text2);margin-top:4px;" id="dash-p2-job">No active job</div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-title">Output by Material</div>
+        <div class="card">
+          <div id="material-bars">
+            <div class="stat-bar">
+              <span class="stat-bar-label" style="color:var(--viton);">VITON</span>
+              <div class="stat-bar-track"><div class="stat-bar-fill" id="bar-viton" style="width:0%;background:var(--viton);"></div></div>
+              <span class="stat-bar-value" id="val-viton">0</span>
+            </div>
+            <div class="stat-bar">
+              <span class="stat-bar-label" style="color:var(--buna);">BUNA</span>
+              <div class="stat-bar-track"><div class="stat-bar-fill" id="bar-buna" style="width:0%;background:var(--buna);"></div></div>
+              <span class="stat-bar-value" id="val-buna">0</span>
+            </div>
+            <div class="stat-bar">
+              <span class="stat-bar-label" style="color:var(--epdm);">EPDM</span>
+              <div class="stat-bar-track"><div class="stat-bar-fill" id="bar-epdm" style="width:0%;background:var(--epdm);"></div></div>
+              <span class="stat-bar-value" id="val-epdm">0</span>
+            </div>
+          </div>
+          <div style="margin-top:20px;">
+            <div class="section-title" style="font-size:16px;">Recent Activity</div>
+            <div id="recent-activity" style="font-family:var(--font-mono);font-size:11px;color:var(--text2);line-height:2;">
+              <span style="color:var(--text3);">No activity yet — start a press cycle to begin logging.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PRESS TIMERS ===== -->
+  <div id="page-presses" class="page">
+    <div class="press-container">
+
+      <!-- PRESS 1 -->
+      <div class="press-card" id="pressCard1">
+        <div class="press-header">
+          <div class="press-name">PRESS 1</div>
+          <span class="press-status status-idle" id="pressStatus1">IDLE</span>
+        </div>
+        <div class="press-config">
+          <div class="form-group">
+            <label class="form-label">Material</label>
+            <select class="press-select" id="p1-material" onchange="updateSuggestedTime(1)">
+              <option value="">Select</option>
+              <option value="Viton">Viton</option>
+              <option value="Buna">Buna</option>
+              <option value="EPDM">EPDM</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Cord Size</label>
+            <select class="press-select" id="p1-size" onchange="updateSuggestedTime(1)">
+              <option value="">Select</option>
+              <option value="4">4mm</option>
+              <option value="5">5mm</option>
+              <option value="6">6mm</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Duration</label>
+            <select class="press-select" id="p1-duration">
+              <option value="180">180s</option>
+              <option value="240">240s</option>
+              <option value="300">300s</option>
+              <option value="360">360s</option>
+            </select>
+          </div>
+        </div>
+        <div id="p1-suggested" class="suggested-time" style="display:none;"></div>
+        <div class="timer-display" id="timerDisplay1">0:00</div>
+        <div class="timer-progress"><div class="timer-progress-bar" id="timerBar1" style="width:0%"></div></div>
+        <div class="press-buttons">
+          <button class="btn btn-primary" id="p1-start" onclick="startTimer(1)">START</button>
+          <button class="btn btn-secondary" id="p1-reset" onclick="resetTimer(1)" disabled>RESET</button>
+          <button class="btn btn-success" id="p1-pass" onclick="logResult(1,'pass')" disabled>✓ PASS</button>
+          <button class="btn btn-danger" id="p1-fail" onclick="logResult(1,'fail')" disabled>✗ FAIL</button>
+        </div>
+      </div>
+
+      <!-- PRESS 2 -->
+      <div class="press-card" id="pressCard2">
+        <div class="press-header">
+          <div class="press-name">PRESS 2</div>
+          <span class="press-status status-idle" id="pressStatus2">IDLE</span>
+        </div>
+        <div class="press-config">
+          <div class="form-group">
+            <label class="form-label">Material</label>
+            <select class="press-select" id="p2-material" onchange="updateSuggestedTime(2)">
+              <option value="">Select</option>
+              <option value="Viton">Viton</option>
+              <option value="Buna">Buna</option>
+              <option value="EPDM">EPDM</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Cord Size</label>
+            <select class="press-select" id="p2-size" onchange="updateSuggestedTime(2)">
+              <option value="">Select</option>
+              <option value="4">4mm</option>
+              <option value="5">5mm</option>
+              <option value="6">6mm</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Duration</label>
+            <select class="press-select" id="p2-duration">
+              <option value="180">180s</option>
+              <option value="240">240s</option>
+              <option value="300">300s</option>
+              <option value="360">360s</option>
+            </select>
+          </div>
+        </div>
+        <div id="p2-suggested" class="suggested-time" style="display:none;"></div>
+        <div class="timer-display" id="timerDisplay2">0:00</div>
+        <div class="timer-progress"><div class="timer-progress-bar" id="timerBar2" style="width:0%"></div></div>
+        <div class="press-buttons">
+          <button class="btn btn-primary" id="p2-start" onclick="startTimer(2)">START</button>
+          <button class="btn btn-secondary" id="p2-reset" onclick="resetTimer(2)" disabled>RESET</button>
+          <button class="btn btn-success" id="p2-pass" onclick="logResult(2,'pass')" disabled>✓ PASS</button>
+          <button class="btn btn-danger" id="p2-fail" onclick="logResult(2,'fail')" disabled>✗ FAIL</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TODAY'S PRESS LOG -->
+    <div class="section-title">Today's Press Log</div>
+    <div class="card">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Press</th>
+            <th>Material</th>
+            <th>Size</th>
+            <th>Duration</th>
+            <th>Result</th>
+          </tr>
+        </thead>
+        <tbody id="pressLog">
+          <tr><td colspan="6" style="color:var(--text3);text-align:center;padding:24px;">No press cycles logged yet.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== CUT LENGTH CALCULATOR ===== -->
+  <div id="page-calculator" class="page">
+    <div class="section-title">Cut Length Calculator</div>
+    <div class="card mb-16">
+      <div style="font-family:var(--font-mono);font-size:11px;color:var(--text2);margin-bottom:16px;letter-spacing:1px;">
+        CUT LENGTH = MD × π &nbsp;|&nbsp; WHERE MD = MEAN DIAMETER OF O-RING
+      </div>
+      <div class="calc-grid">
+        <div class="form-group">
+          <label class="form-label">MD (mm)</label>
+          <input type="number" class="form-input" id="calc-md" placeholder="e.g. 25.4" step="0.01" oninput="calculateCutLength()">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Cord Size</label>
+          <select class="form-input" id="calc-size" style="font-size:12px;">
+            <option value="4">4mm</option>
+            <option value="5">5mm</option>
+            <option value="6">6mm</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Material</label>
+          <select class="form-input" id="calc-material" style="font-size:12px;">
+            <option value="Viton">Viton</option>
+            <option value="Buna">Buna</option>
+            <option value="EPDM">EPDM</option>
+          </select>
+        </div>
+        <div class="calc-result">
+          <div>
+            <div class="calc-result-label">Cut Length</div>
+            <div class="calc-result-value" id="calc-result">— mm</div>
+          </div>
+          <div style="text-align:right;">
+            <div class="calc-result-label">Press Time</div>
+            <div style="font-family:var(--font-display);font-size:20px;color:var(--accent2);" id="calc-press-time">—s</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CALC HISTORY -->
+    <div class="section-title">Calculation History</div>
+    <div class="card">
+      <table class="data-table">
+        <thead>
+          <tr><th>Time</th><th>MD</th><th>Cord</th><th>Material</th><th>Cut Length</th><th>Press Time</th></tr>
+        </thead>
+        <tbody id="calcHistory">
+          <tr><td colspan="6" style="color:var(--text3);text-align:center;padding:24px;">No calculations yet.</td></tr>
+        </tbody>
+      </table>
+      <div style="margin-top:12px;display:flex;gap:8px;">
+        <button class="btn btn-primary" onclick="saveCalcToHistory()" style="flex:0;padding:10px 20px;">SAVE TO HISTORY</button>
+        <button class="btn btn-secondary" onclick="sendToPress()" style="flex:0;padding:10px 20px;">SEND TO PRESS →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== JOB QUEUE ===== -->
+  <div id="page-jobs" class="page">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <div class="section-title" style="margin-bottom:0;">Job Queue</div>
+      <button class="btn btn-primary" onclick="openJobModal()" style="flex:0;padding:10px 20px;">+ ADD JOB</button>
+    </div>
+
+    <div id="jobQueue"></div>
+  </div>
+
+  <!-- ===== SCRAP LOG ===== -->
+  <div id="page-scrap" class="page">
+    <div class="scrap-summary">
+      <div class="scrap-stat">
+        <div class="scrap-stat-val" id="scrap-total">0</div>
+        <div class="scrap-stat-label">Total Failures</div>
+      </div>
+      <div class="scrap-stat">
+        <div class="scrap-stat-val" id="scrap-rate-display" style="color:var(--yellow);">0%</div>
+        <div class="scrap-stat-label">Failure Rate</div>
+      </div>
+      <div class="scrap-stat">
+        <div class="scrap-stat-val" id="scrap-today" style="color:var(--red);">0</div>
+        <div class="scrap-stat-label">Today</div>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <div class="section-title" style="margin-bottom:0;">Splice Failure Log</div>
+      <button class="btn btn-danger" onclick="openScrapModal()" style="flex:0;padding:10px 20px;">+ LOG FAILURE</button>
+    </div>
+
+    <div class="card">
+      <table class="data-table">
+        <thead>
+          <tr><th>Date / Time</th><th>Press</th><th>Material</th><th>Cord Size</th><th>Part #</th><th>Reason</th></tr>
+        </thead>
+        <tbody id="scrapLog">
+          <tr><td colspan="6" style="color:var(--text3);text-align:center;padding:24px;">No failures logged. Keep it that way.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== INVENTORY ===== -->
+  <div id="page-inventory" class="page">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <div class="section-title" style="margin-bottom:0;">Material Inventory</div>
+      <button class="btn btn-secondary" onclick="saveInventory()" style="flex:0;padding:10px 20px;">SAVE ALL</button>
+    </div>
+
+    <div class="section-title" style="font-size:16px;">Viton</div>
+    <div class="inv-grid mb-16" id="inv-viton"></div>
+
+    <div class="section-title" style="font-size:16px;">Buna</div>
+    <div class="inv-grid mb-16" id="inv-buna"></div>
+
+    <div class="section-title" style="font-size:16px;">EPDM</div>
+    <div class="inv-grid mb-16" id="inv-epdm"></div>
+
+    <div class="section-title" style="font-size:16px;">Purchased (Teflon / Tevlon)</div>
+    <div class="card">
+      <div style="font-family:var(--font-mono);font-size:12px;color:var(--text2);margin-bottom:12px;">These materials are bought for resale — not vulcanized. Track stock levels below.</div>
+      <div class="inv-grid" id="inv-purchased"></div>
+    </div>
+  </div>
+
+  <!-- ===== PART LOOKUP ===== -->
+  <div id="page-parts" class="page">
+    <div class="section-title">Part Number Lookup</div>
+    <div class="card mb-16">
+      <div style="font-family:var(--font-mono);font-size:10px;color:var(--text2);letter-spacing:2px;margin-bottom:8px;">PART NUMBER STRUCTURE</div>
+      <div style="display:flex;gap:24px;flex-wrap:wrap;">
+        <span style="font-family:var(--font-mono);font-size:12px;"><span style="color:var(--viton);">009003</span>-XXXXXX = Viton</span>
+        <span style="font-family:var(--font-mono);font-size:12px;"><span style="color:var(--buna);">009001</span>-XXXXXX = Buna</span>
+        <span style="font-family:var(--font-mono);font-size:12px;"><span style="color:var(--epdm);">009002</span>-XXXXXX = EPDM</span>
+      </div>
+    </div>
+
+    <div class="part-search-container">
+      <input type="text" class="form-input" id="partSearch" placeholder="Search by part number, material, or cord size..." oninput="filterParts()" style="font-size:13px;padding:14px 16px;">
+    </div>
+
+    <div class="part-results" id="partResults"></div>
+
+    <div style="margin-top:16px;display:flex;justify-content:flex-end;">
+      <button class="btn btn-primary" onclick="openPartModal()" style="flex:0;padding:10px 20px;">+ ADD PART</button>
+    </div>
+  </div>
+
+  <!-- ===== SHIFT HANDOFF ===== -->
+  <div id="page-handoff" class="page">
+    <div class="section-title">Shift Handoff Report</div>
+
+    <div class="grid-2">
+      <div>
+        <div class="card mb-16">
+          <div class="card-label">Auto-Generated Summary</div>
+          <div id="handoff-auto" style="font-family:var(--font-mono);font-size:12px;color:var(--text2);line-height:1.8;margin-top:8px;white-space:pre-wrap;"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-label" style="margin-bottom:12px;">Additional Notes</div>
+          <textarea class="handoff-textarea" id="handoff-notes" placeholder="Equipment issues, material concerns, instructions for next shift, anything they need to know..."></textarea>
+          <div style="display:flex;gap:8px;margin-top:12px;">
+            <button class="btn btn-primary" onclick="submitHandoff()">SUBMIT HANDOFF</button>
+            <button class="btn btn-secondary" onclick="printHandoff()">PRINT</button>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-title" style="font-size:16px;">Previous Handoffs</div>
+        <div id="handoff-history">
+          <div style="font-family:var(--font-mono);font-size:11px;color:var(--text3);text-align:center;padding:32px;">No previous handoffs on record.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ADD JOB MODAL -->
+<div class="modal-overlay" id="jobModal">
+  <div class="modal">
+    <div class="modal-title">ADD JOB</div>
+    <button class="modal-close" onclick="closeModal('jobModal')">✕</button>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Work Order #</label>
+        <input type="text" class="form-input" id="job-wo" placeholder="WO-0001">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Part Number</label>
+        <input type="text" class="form-input" id="job-part" placeholder="009001-000100">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Material</label>
+        <select class="form-input" id="job-material" style="font-size:12px;">
+          <option value="Viton">Viton</option>
+          <option value="Buna">Buna</option>
+          <option value="EPDM">EPDM</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Cord Size</label>
+        <select class="form-input" id="job-size" style="font-size:12px;">
+          <option value="4">4mm</option>
+          <option value="5">5mm</option>
+          <option value="6">6mm</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">MD (mm)</label>
+        <input type="number" class="form-input" id="job-md" placeholder="25.4" step="0.01">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Quantity</label>
+        <input type="number" class="form-input" id="job-qty" placeholder="100" min="1">
+      </div>
+    </div>
+    <div class="form-full">
+      <div class="form-group">
+        <label class="form-label">Priority</label>
+        <select class="form-input" id="job-priority" style="font-size:12px;">
+          <option value="normal">Normal</option>
+          <option value="urgent">Urgent</option>
+          <option value="rush">Rush</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="addJob()" style="width:100%;margin-top:8px;">ADD TO QUEUE</button>
+  </div>
+</div>
+
+<!-- SCRAP MODAL -->
+<div class="modal-overlay" id="scrapModal">
+  <div class="modal">
+    <div class="modal-title">LOG FAILURE</div>
+    <button class="modal-close" onclick="closeModal('scrapModal')">✕</button>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Press</label>
+        <select class="form-input" id="scrap-press" style="font-size:12px;">
+          <option value="1">Press 1</option>
+          <option value="2">Press 2</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Material</label>
+        <select class="form-input" id="scrap-material" style="font-size:12px;">
+          <option value="Viton">Viton</option>
+          <option value="Buna">Buna</option>
+          <option value="EPDM">EPDM</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Cord Size</label>
+        <select class="form-input" id="scrap-size" style="font-size:12px;">
+          <option value="4">4mm</option>
+          <option value="5">5mm</option>
+          <option value="6">6mm</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Part # (optional)</label>
+        <input type="text" class="form-input" id="scrap-part" placeholder="009001-000100">
+      </div>
+    </div>
+    <div class="form-full">
+      <div class="form-group">
+        <label class="form-label">Reason / Notes</label>
+        <input type="text" class="form-input" id="scrap-reason" placeholder="e.g. Splice didn't hold, glue issue, short cut...">
+      </div>
+    </div>
+    <button class="btn btn-danger" onclick="logScrap()" style="width:100%;margin-top:8px;">LOG FAILURE</button>
+  </div>
+</div>
+
+<!-- ADD PART MODAL -->
+<div class="modal-overlay" id="partModal">
+  <div class="modal">
+    <div class="modal-title">ADD PART</div>
+    <button class="modal-close" onclick="closeModal('partModal')">✕</button>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Part Number</label>
+        <input type="text" class="form-input" id="new-part-num" placeholder="009001-000100">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Material</label>
+        <select class="form-input" id="new-part-mat" style="font-size:12px;">
+          <option value="Viton">Viton</option>
+          <option value="Buna">Buna</option>
+          <option value="EPDM">EPDM</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Cord Size (mm)</label>
+        <select class="form-input" id="new-part-size" style="font-size:12px;">
+          <option value="4">4mm</option>
+          <option value="5">5mm</option>
+          <option value="6">6mm</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">MD (mm)</label>
+        <input type="number" class="form-input" id="new-part-md" placeholder="25.4" step="0.01">
+      </div>
+    </div>
+    <div class="form-full">
+      <div class="form-group">
+        <label class="form-label">Description (optional)</label>
+        <input type="text" class="form-input" id="new-part-desc" placeholder="e.g. Standard shaft seal">
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="addPart()" style="width:100%;margin-top:8px;">ADD PART</button>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// PRESS TIME MATRIX — REAL FIL-TREK DATA
+// ============================================================
+const PRESS_TIMES = {
+  Viton: { 4: 240, 5: 300, 6: 360 },
+  Buna:  { 4: 240, 5: 300, 6: 360 },
+  EPDM:  { 4: 180, 5: 240, 6: 300 }
+};
+
+const MATERIAL_PREFIXES = {
+  Buna: '009001',
+  EPDM: '009002',
+  Viton: '009003'
+};
+
+// ============================================================
+// STATE
+// ============================================================
+let state = {
+  presses: {
+    1: { running: false, done: false, elapsed: 0, duration: 180, material: '', size: '', interval: null },
+    2: { running: false, done: false, elapsed: 0, duration: 180, material: '', size: '', interval: null }
+  },
+  pressLog: [],
+  jobs: [],
+  scrapLog: [],
+  calcHistory: [],
+  handoffHistory: [],
+  inventory: {},
+  parts: [
+    { num: '009001-000100', material: 'Buna', size: 4, md: 10.0, desc: 'Standard shaft seal' },
+    { num: '009001-000150', material: 'Buna', size: 5, md: 15.0, desc: 'Hydraulic piston seal' },
+    { num: '009001-000200', material: 'Buna', size: 6, md: 20.0, desc: 'Face seal' },
+    { num: '009002-000120', material: 'EPDM', size: 4, md: 12.0, desc: 'Water resistant' },
+    { num: '009002-000180', material: 'EPDM', size: 5, md: 18.0, desc: 'Steam service' },
+    { num: '009002-000250', material: 'EPDM', size: 6, md: 25.0, desc: 'Outdoor/UV service' },
+    { num: '009003-000100', material: 'Viton', size: 4, md: 10.0, desc: 'Chemical resistant' },
+    { num: '009003-000160', material: 'Viton', size: 5, md: 16.0, desc: 'High temp service' },
+    { num: '009003-000220', material: 'Viton', size: 6, md: 22.0, desc: 'Fuel/oil service' },
+  ],
+  stats: { output: 0, cycles: 0, jobsDone: 0, byMaterial: { Viton: 0, Buna: 0, EPDM: 0 } },
+  activity: []
+};
+
+// Load from localStorage if available
+function loadState() {
+  try {
+    const saved = localStorage.getItem('vulcanex_state');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      state.jobs = parsed.jobs || [];
+      state.scrapLog = parsed.scrapLog || [];
+      state.calcHistory = parsed.calcHistory || [];
+      state.handoffHistory = parsed.handoffHistory || [];
+      state.inventory = parsed.inventory || {};
+      state.parts = parsed.parts || state.parts;
+      state.stats = parsed.stats || state.stats;
+      state.activity = parsed.activity || [];
+    }
+  } catch(e) {}
+}
+
+function saveState() {
+  try {
+    localStorage.setItem('vulcanex_state', JSON.stringify({
+      jobs: state.jobs,
+      scrapLog: state.scrapLog,
+      calcHistory: state.calcHistory,
+      handoffHistory: state.handoffHistory,
+      inventory: state.inventory,
+      parts: state.parts,
+      stats: state.stats,
+      activity: state.activity
+    }));
+  } catch(e) {}
+}
+
+// ============================================================
+// CLOCK
+// ============================================================
+function updateClock() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2,'0');
+  const m = String(now.getMinutes()).padStart(2,'0');
+  const s = String(now.getSeconds()).padStart(2,'0');
+  document.getElementById('liveClock').textContent = `${h}:${m}:${s}`;
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function switchPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  event.target.classList.add('active');
+  if (name === 'handoff') updateHandoffSummary();
+  if (name === 'parts') renderParts();
+  if (name === 'inventory') renderInventory();
+  if (name === 'jobs') renderJobs();
+  if (name === 'scrap') renderScrap();
+}
+
+// ============================================================
+// NOTIFICATIONS
+// ============================================================
+function notify(msg, type='info') {
+  const c = document.getElementById('notifContainer');
+  const n = document.createElement('div');
+  n.className = `notif ${type}`;
+  n.innerHTML = `<div class="notif-dot"></div><span>${msg}</span>`;
+  c.appendChild(n);
+  setTimeout(() => n.remove(), 4000);
+}
+
+// ============================================================
+// PRESS TIMERS
+// ============================================================
+function updateSuggestedTime(press) {
+  const mat = document.getElementById(`p${press}-material`).value;
+  const size = document.getElementById(`p${press}-size`).value;
+  const el = document.getElementById(`p${press}-suggested`);
+  if (mat && size && PRESS_TIMES[mat] && PRESS_TIMES[mat][size]) {
+    const t = PRESS_TIMES[mat][size];
+    el.style.display = 'inline-block';
+    el.textContent = `⚡ SUGGESTED: ${t}s for ${mat} ${size}mm`;
+    document.getElementById(`p${press}-duration`).value = t;
+  } else {
+    el.style.display = 'none';
+  }
+}
+
+function startTimer(press) {
+  const p = state.presses[press];
+  if (p.running) return;
+  const duration = parseInt(document.getElementById(`p${press}-duration`).value);
+  const material = document.getElementById(`p${press}-material`).value;
+  const size = document.getElementById(`p${press}-size`).value;
+  p.duration = duration;
+  p.material = material;
+  p.size = size;
+  p.elapsed = 0;
+  p.running = true;
+  p.done = false;
+
+  const card = document.getElementById(`pressCard${press}`);
+  const display = document.getElementById(`timerDisplay${press}`);
+  const bar = document.getElementById(`timerBar${press}`);
+  const status = document.getElementById(`pressStatus${press}`);
+
+  card.className = 'press-card running';
+  status.className = 'press-status status-running';
+  status.textContent = 'RUNNING';
+  display.className = 'timer-display running';
+
+  document.getElementById(`p${press}-start`).disabled = true;
+  document.getElementById(`p${press}-reset`).disabled = false;
+
+  p.interval = setInterval(() => {
+    p.elapsed++;
+    const remaining = p.duration - p.elapsed;
+    const pct = (p.elapsed / p.duration) * 100;
+
+    const mins = Math.floor(remaining / 60);
+    const secs = remaining % 60;
+    display.textContent = `${mins}:${String(secs).padStart(2,'0')}`;
+    bar.style.width = pct + '%';
+
+    if (remaining <= 10 && remaining > 0) {
+      display.className = 'timer-display warning';
+      bar.style.background = 'var(--yellow)';
+    }
+
+    // Update dashboard
+    updateDashPressStatus(press);
+
+    if (remaining <= 0) {
+      clearInterval(p.interval);
+      p.running = false;
+      p.done = true;
+      display.className = 'timer-display done';
+      display.textContent = 'DONE';
+      bar.style.width = '100%';
+      bar.className = 'timer-progress-bar done-bar';
+      status.className = 'press-status status-done';
+      status.textContent = 'DONE';
+      card.className = 'press-card done';
+      document.getElementById(`p${press}-pass`).disabled = false;
+      document.getElementById(`p${press}-fail`).disabled = false;
+      state.stats.cycles++;
+      notify(`Press ${press} cycle complete — log result`, 'success');
+      updateDashboard();
+      updateDashPressStatus(press);
+      saveState();
+    }
+  }, 1000);
+}
+
+function resetTimer(press) {
+  const p = state.presses[press];
+  if (p.interval) clearInterval(p.interval);
+  p.running = false; p.done = false; p.elapsed = 0;
+  document.getElementById(`timerDisplay${press}`).textContent = '0:00';
+  document.getElementById(`timerDisplay${press}`).className = 'timer-display';
+  document.getElementById(`timerBar${press}`).style.width = '0%';
+  document.getElementById(`timerBar${press}`).style.background = 'var(--accent)';
+  document.getElementById(`timerBar${press}`).className = 'timer-progress-bar';
+  document.getElementById(`pressStatus${press}`).className = 'press-status status-idle';
+  document.getElementById(`pressStatus${press}`).textContent = 'IDLE';
+  document.getElementById(`pressCard${press}`).className = 'press-card';
+  document.getElementById(`p${press}-start`).disabled = false;
+  document.getElementById(`p${press}-reset`).disabled = true;
+  document.getElementById(`p${press}-pass`).disabled = true;
+  document.getElementById(`p${press}-fail`).disabled = true;
+  updateDashPressStatus(press);
+}
+
+function logResult(press, result) {
+  const p = state.presses[press];
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString('en-CA', { hour:'2-digit', minute:'2-digit' });
+
+  const entry = {
+    time: timeStr,
+    press,
+    material: p.material || '—',
+    size: p.size ? p.size + 'mm' : '—',
+    duration: p.duration + 's',
+    result
+  };
+
+  state.pressLog.unshift(entry);
+
+  if (result === 'pass') {
+    state.stats.output++;
+    if (p.material) state.stats.byMaterial[p.material] = (state.stats.byMaterial[p.material] || 0) + 1;
+    state.activity.unshift(`[${timeStr}] Press ${press} — ${p.material} ${p.size}mm — PASS`);
+    notify(`Pass logged for Press ${press}`, 'success');
+  } else {
+    state.scrapLog.unshift({ ...entry, reason: 'Manual log from press', date: now.toLocaleDateString('en-CA') });
+    state.activity.unshift(`[${timeStr}] Press ${press} — ${p.material} ${p.size}mm — FAIL`);
+    notify(`Failure logged for Press ${press}`, 'error');
+  }
+
+  if (state.activity.length > 20) state.activity = state.activity.slice(0, 20);
+
+  renderPressLog();
+  updateDashboard();
+  resetTimer(press);
+  saveState();
+}
+
+function renderPressLog() {
+  const tbody = document.getElementById('pressLog');
+  if (!state.pressLog.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="color:var(--text3);text-align:center;padding:24px;">No press cycles logged yet.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = state.pressLog.map(e => `
+    <tr>
+      <td>${e.time}</td>
+      <td>Press ${e.press}</td>
+      <td><span class="badge badge-${e.material.toLowerCase()}">${e.material}</span></td>
+      <td>${e.size}</td>
+      <td>${e.duration}</td>
+      <td><span class="badge badge-${e.result}">${e.result.toUpperCase()}</span></td>
+    </tr>
+  `).join('');
+}
+
+// ============================================================
+// DASHBOARD UPDATES
+// ============================================================
+function updateDashboard() {
+  document.getElementById('dash-output').textContent = state.stats.output;
+  document.getElementById('dash-cycles').textContent = state.stats.cycles;
+  document.getElementById('dash-jobs').textContent = state.jobs.filter(j => j.status === 'done').length;
+  document.getElementById('dash-total-jobs').textContent = state.jobs.length;
+
+  const total = state.stats.output + state.scrapLog.length;
+  const rate = total > 0 ? Math.round((state.scrapLog.length / total) * 100) : 0;
+  document.getElementById('dash-scrap').textContent = rate + '%';
+
+  const max = Math.max(1, state.stats.byMaterial.Viton, state.stats.byMaterial.Buna, state.stats.byMaterial.EPDM);
+  ['Viton','Buna','EPDM'].forEach(m => {
+    const val = state.stats.byMaterial[m] || 0;
+    document.getElementById('bar-' + m.toLowerCase()).style.width = (val/max*100) + '%';
+    document.getElementById('val-' + m.toLowerCase()).textContent = val;
+  });
+
+  const actEl = document.getElementById('recent-activity');
+  if (state.activity.length) {
+    actEl.innerHTML = state.activity.slice(0,8).map(a => {
+      const col = a.includes('PASS') ? 'var(--green)' : a.includes('FAIL') ? 'var(--red)' : 'var(--text2)';
+      return `<div style="color:${col};">${a}</div>`;
+    }).join('');
+  }
+}
+
+function updateDashPressStatus(press) {
+  const p = state.presses[press];
+  const statusEl = document.getElementById(`dash-p${press}-status`);
+  const timerEl = document.getElementById(`dash-p${press}-timer`);
+  const jobEl = document.getElementById(`dash-p${press}-job`);
+
+  if (p.running) {
+    const remaining = p.duration - p.elapsed;
+    const mins = Math.floor(remaining / 60);
+    const secs = remaining % 60;
+    statusEl.className = 'press-status status-running';
+    statusEl.textContent = 'RUNNING';
+    timerEl.textContent = `${mins}:${String(secs).padStart(2,'0')}`;
+    jobEl.textContent = p.material ? `${p.material} ${p.size}mm — ${p.duration}s cycle` : 'Running';
+  } else if (p.done) {
+    statusEl.className = 'press-status status-done';
+    statusEl.textContent = 'DONE';
+    timerEl.textContent = 'DONE';
+  } else {
+    statusEl.className = 'press-status status-idle';
+    statusEl.textContent = 'IDLE';
+    timerEl.textContent = '--:--';
+    jobEl.textContent = 'No active job';
+  }
+}
+
+// ============================================================
+// CUT LENGTH CALCULATOR
+// ============================================================
+let currentCalc = null;
+
+function calculateCutLength() {
+  const md = parseFloat(document.getElementById('calc-md').value);
+  const size = document.getElementById('calc-size').value;
+  const mat = document.getElementById('calc-material').value;
+
+  if (isNaN(md) || md <= 0) {
+    document.getElementById('calc-result').textContent = '— mm';
+    document.getElementById('calc-press-time').textContent = '—s';
+    currentCalc = null;
+    return;
+  }
+
+  const cutLength = (md * Math.PI).toFixed(2);
+  const pressTime = PRESS_TIMES[mat] && PRESS_TIMES[mat][parseInt(size)] ? PRESS_TIMES[mat][parseInt(size)] : '—';
+
+  document.getElementById('calc-result').textContent = cutLength + ' mm';
+  document.getElementById('calc-press-time').textContent = pressTime + 's';
+
+  currentCalc = { md, size, mat, cutLength, pressTime };
+}
+
+function saveCalcToHistory() {
+  if (!currentCalc) { notify('Enter an MD value first', 'warning'); return; }
+  const now = new Date();
+  state.calcHistory.unshift({
+    time: now.toLocaleTimeString('en-CA', { hour:'2-digit', minute:'2-digit' }),
+    ...currentCalc
+  });
+  renderCalcHistory();
+  notify('Calculation saved to history', 'success');
+  saveState();
+}
+
+function sendToPress() {
+  if (!currentCalc) { notify('Calculate a cut length first', 'warning'); return; }
+  notify(`Cut length ${currentCalc.cutLength}mm sent — switch to Press Timers`, 'info');
+}
+
+function renderCalcHistory() {
+  const tbody = document.getElementById('calcHistory');
+  if (!state.calcHistory.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="color:var(--text3);text-align:center;padding:24px;">No calculations yet.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = state.calcHistory.slice(0,20).map(c => `
+    <tr>
+      <td>${c.time}</td>
+      <td>${c.md} mm</td>
+      <td>${c.size}mm</td>
+      <td><span class="badge badge-${c.mat.toLowerCase()}">${c.mat}</span></td>
+      <td style="color:var(--accent);font-weight:600;">${c.cutLength} mm</td>
+      <td>${c.pressTime}s</td>
+    </tr>
+  `).join('');
+}
+
+// ============================================================
+// JOB QUEUE
+// ============================================================
+function openJobModal() { document.getElementById('jobModal').classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+function addJob() {
+  const wo = document.getElementById('job-wo').value.trim();
+  const part = document.getElementById('job-part').value.trim();
+  const mat = document.getElementById('job-material').value;
+  const size = document.getElementById('job-size').value;
+  const md = parseFloat(document.getElementById('job-md').value);
+  const qty = parseInt(document.getElementById('job-qty').value);
+  const priority = document.getElementById('job-priority').value;
+
+  if (!wo) { notify('Enter a work order number', 'warning'); return; }
+  if (!qty || qty < 1) { notify('Enter a valid quantity', 'warning'); return; }
+
+  const cutLength = md ? (md * Math.PI).toFixed(2) : null;
+  const pressTime = PRESS_TIMES[mat] && PRESS_TIMES[mat][parseInt(size)] ? PRESS_TIMES[mat][parseInt(size)] : null;
+
+  state.jobs.push({
+    id: Date.now(),
+    wo, part: part || `${MATERIAL_PREFIXES[mat]}-${String(Date.now()).slice(-6)}`,
+    material: mat, size, md, qty, priority,
+    cutLength, pressTime,
+    status: 'pending',
+    completed: 0
+  });
+
+  closeModal('jobModal');
+  renderJobs();
+  updateDashboard();
+  notify(`Job ${wo} added to queue`, 'success');
+  saveState();
+
+  // Clear inputs
+  ['job-wo','job-part','job-md','job-qty'].forEach(id => document.getElementById(id).value = '');
+}
+
+function renderJobs() {
+  const el = document.getElementById('jobQueue');
+  if (!state.jobs.length) {
+    el.innerHTML = '<div style="font-family:var(--font-mono);font-size:12px;color:var(--text3);text-align:center;padding:48px;border:1px solid var(--border);border-radius:4px;">No jobs in queue. Add a job from the paper traveller.</div>';
+    return;
+  }
+
+  const order = { rush: 0, urgent: 1, normal: 2 };
+  const sorted = [...state.jobs].sort((a,b) => (order[a.priority]||2) - (order[b.priority]||2));
+
+  el.innerHTML = sorted.map((job, i) => {
+    const pcolor = job.priority === 'rush' ? 'var(--red)' : job.priority === 'urgent' ? 'var(--yellow)' : 'var(--text3)';
+    return `
+    <div class="job-item ${job.status === 'done' ? '' : i === 0 ? 'active-job' : ''}" style="opacity:${job.status==='done'?'0.4':'1'}">
+      <div class="job-number">${i+1}</div>
+      <div>
+        <div class="job-info-main">${job.wo} · <span style="color:var(--text2);font-weight:400;">${job.part}</span></div>
+        <div class="job-info-sub">
+          <span class="badge badge-${job.material.toLowerCase()}" style="margin-right:6px;">${job.material}</span>
+          ${job.size}mm cord
+          ${job.cutLength ? ` · Cut: <span style="color:var(--accent);">${job.cutLength}mm</span>` : ''}
+          ${job.pressTime ? ` · Press: ${job.pressTime}s` : ''}
+          &nbsp;<span style="color:${pcolor};font-size:10px;letter-spacing:1px;text-transform:uppercase;">${job.priority}</span>
+        </div>
+      </div>
+      <div>
+        <div class="job-qty">${job.qty}</div>
+        <div class="job-qty-label">pieces</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        ${job.status !== 'done' ? `<button class="btn btn-success" style="padding:6px 12px;font-size:10px;" onclick="completeJob(${job.id})">DONE</button>` : '<span style="font-family:var(--font-mono);font-size:10px;color:var(--green);">✓ DONE</span>'}
+        <button class="btn btn-danger" style="padding:6px 12px;font-size:10px;" onclick="removeJob(${job.id})">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function completeJob(id) {
+  const job = state.jobs.find(j => j.id === id);
+  if (job) {
+    job.status = 'done';
+    state.stats.jobsDone++;
+    state.stats.output += job.qty;
+    if (job.material) state.stats.byMaterial[job.material] = (state.stats.byMaterial[job.material] || 0) + job.qty;
+    notify(`Job ${job.wo} marked complete — ${job.qty} pcs`, 'success');
+    renderJobs();
+    updateDashboard();
+    saveState();
+  }
+}
+
+function removeJob(id) {
+  state.jobs = state.jobs.filter(j => j.id !== id);
+  renderJobs();
+  updateDashboard();
+  saveState();
+}
+
+// ============================================================
+// SCRAP LOG
+// ============================================================
+function openScrapModal() { document.getElementById('scrapModal').classList.add('open'); }
+
+function logScrap() {
+  const press = document.getElementById('scrap-press').value;
+  const mat = document.getElementById('scrap-material').value;
+  const size = document.getElementById('scrap-size').value;
+  const part = document.getElementById('scrap-part').value;
+  const reason = document.getElementById('scrap-reason').value;
+
+  const now = new Date();
+  state.scrapLog.unshift({
+    date: now.toLocaleDateString('en-CA'),
+    time: now.toLocaleTimeString('en-CA', { hour:'2-digit', minute:'2-digit' }),
+    press, material: mat, size: size + 'mm',
+    part: part || '—', reason: reason || 'Not specified'
+  });
+
+  closeModal('scrapModal');
+  renderScrap();
+  updateDashboard();
+  notify('Splice failure logged', 'error');
+  saveState();
+
+  document.getElementById('scrap-part').value = '';
+  document.getElementById('scrap-reason').value = '';
+}
+
+function renderScrap() {
+  const today = new Date().toLocaleDateString('en-CA');
+  const todayFails = state.scrapLog.filter(s => s.date === today).length;
+  const total = state.stats.output + state.scrapLog.length;
+  const rate = total > 0 ? ((state.scrapLog.length / total) * 100).toFixed(1) : 0;
+
+  document.getElementById('scrap-total').textContent = state.scrapLog.length;
+  document.getElementById('scrap-rate-display').textContent = rate + '%';
+  document.getElementById('scrap-today').textContent = todayFails;
+
+  const tbody = document.getElementById('scrapLog');
+  if (!state.scrapLog.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="color:var(--text3);text-align:center;padding:24px;">No failures logged. Keep it that way.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = state.scrapLog.map(s => `
+    <tr>
+      <td>${s.date} ${s.time}</td>
+      <td>Press ${s.press}</td>
+      <td><span class="badge badge-${s.material.toLowerCase()}">${s.material}</span></td>
+      <td>${s.size}</td>
+      <td>${s.part}</td>
+      <td style="color:var(--text2);">${s.reason}</td>
+    </tr>
+  `).join('');
+}
+
+// ============================================================
+// INVENTORY
+// ============================================================
+const SIZES = [4, 5, 6];
+const MATERIALS_VULCANIZED = ['Viton', 'Buna', 'EPDM'];
+
+function initInventory() {
+  MATERIALS_VULCANIZED.forEach(mat => {
+    SIZES.forEach(size => {
+      const key = `${mat}-${size}`;
+      if (state.inventory[key] === undefined) state.inventory[key] = 0;
+    });
+  });
+  ['Teflon-4','Teflon-5','Tevlon-4','Tevlon-5'].forEach(k => {
+    if (state.inventory[k] === undefined) state.inventory[k] = 0;
+  });
+}
+
+function renderInventory() {
+  initInventory();
+  MATERIALS_VULCANIZED.forEach(mat => {
+    const el = document.getElementById('inv-' + mat.toLowerCase());
+    el.innerHTML = SIZES.map(size => {
+      const key = `${mat}-${size}`;
+      const qty = state.inventory[key] || 0;
+      const low = qty < 50;
+      return `
+        <div class="inv-card inv-${mat.toLowerCase()} ${low ? 'inv-low' : ''}">
+          <div class="inv-material">${mat}</div>
+          <div class="inv-size">${size}mm Cord</div>
+          <input type="number" class="inv-qty-input" value="${qty}" min="0"
+            onchange="updateInventory('${key}', this.value)"
+            oninput="updateInventory('${key}', this.value)">
+          <div class="inv-unit">meters in stock</div>
+        </div>`;
+    }).join('');
+  });
+
+  document.getElementById('inv-purchased').innerHTML = [
+    { key:'Teflon-4', label:'Teflon 4mm' },
+    { key:'Teflon-5', label:'Teflon 5mm' },
+    { key:'Tevlon-4', label:'Tevlon 4mm' },
+    { key:'Tevlon-5', label:'Tevlon 5mm' },
+  ].map(item => `
+    <div class="inv-card" style="border-color:rgba(255,214,0,0.2);">
+      <div class="inv-material" style="color:var(--yellow);">PURCHASED</div>
+      <div class="inv-size">${item.label}</div>
+      <input type="number" class="inv-qty-input" value="${state.inventory[item.key]||0}" min="0"
+        onchange="updateInventory('${item.key}', this.value)">
+      <div class="inv-unit">units in stock</div>
+    </div>
+  `).join('');
+}
+
+function updateInventory(key, val) {
+  state.inventory[key] = parseInt(val) || 0;
+}
+
+function saveInventory() {
+  saveState();
+  notify('Inventory saved', 'success');
+}
+
+// ============================================================
+// PART LOOKUP
+// ============================================================
+function filterParts() {
+  const q = document.getElementById('partSearch').value.toLowerCase();
+  const filtered = state.parts.filter(p =>
+    p.num.toLowerCase().includes(q) ||
+    p.material.toLowerCase().includes(q) ||
+    String(p.size).includes(q) ||
+    (p.desc && p.desc.toLowerCase().includes(q))
+  );
+  renderPartResults(filtered);
+}
+
+function renderParts() {
+  renderPartResults(state.parts);
+}
+
+function renderPartResults(parts) {
+  const el = document.getElementById('partResults');
+  if (!parts.length) {
+    el.innerHTML = '<div style="padding:24px;font-family:var(--font-mono);font-size:12px;color:var(--text3);text-align:center;">No parts found.</div>';
+    return;
+  }
+  el.innerHTML = parts.map(p => {
+    const cutLength = p.md ? (p.md * Math.PI).toFixed(2) : '—';
+    const pressTime = PRESS_TIMES[p.material] && PRESS_TIMES[p.material][p.size] ? PRESS_TIMES[p.material][p.size] + 's' : '—';
+    return `
+    <div class="part-result-row">
+      <div>
+        <div class="part-num">${p.num}</div>
+        <div style="font-family:var(--font-mono);font-size:10px;color:var(--text2);margin-top:2px;">${p.desc || ''}</div>
+      </div>
+      <span class="badge badge-${p.material.toLowerCase()}">${p.material}</span>
+      <span style="font-family:var(--font-mono);font-size:12px;color:var(--text2);">${p.size}mm</span>
+      <span style="font-family:var(--font-mono);font-size:12px;"><span style="color:var(--text3);">Cut:</span> <span style="color:var(--accent);">${cutLength}mm</span></span>
+      <span style="font-family:var(--font-mono);font-size:12px;"><span style="color:var(--text3);">Press:</span> ${pressTime}</span>
+    </div>`;
+  }).join('');
+}
+
+function openPartModal() { document.getElementById('partModal').classList.add('open'); }
+
+function addPart() {
+  const num = document.getElementById('new-part-num').value.trim();
+  const mat = document.getElementById('new-part-mat').value;
+  const size = parseInt(document.getElementById('new-part-size').value);
+  const md = parseFloat(document.getElementById('new-part-md').value);
+  const desc = document.getElementById('new-part-desc').value.trim();
+
+  if (!num) { notify('Enter a part number', 'warning'); return; }
+
+  state.parts.push({ num, material: mat, size, md: md || null, desc });
+  closeModal('partModal');
+  renderParts();
+  notify(`Part ${num} added`, 'success');
+  saveState();
+
+  ['new-part-num','new-part-md','new-part-desc'].forEach(id => document.getElementById(id).value = '');
+}
+
+// ============================================================
+// SHIFT HANDOFF
+// ============================================================
+function updateHandoffSummary() {
+  const today = new Date().toLocaleDateString('en-CA');
+  const todayFails = state.scrapLog.filter(s => s.date === today).length;
+  const completedJobs = state.jobs.filter(j => j.status === 'done');
+  const total = state.stats.output + state.scrapLog.length;
+  const rate = total > 0 ? ((state.scrapLog.length / total) * 100).toFixed(1) : 0;
+
+  const summary = `DATE: ${today}
+SHIFT: Day Shift (07:30–16:30)
+
+── PRODUCTION ──
+Total O-rings completed:  ${state.stats.output}
+Press cycles run:         ${state.stats.cycles}
+Jobs completed:           ${completedJobs.length} of ${state.jobs.length}
+
+── MATERIAL OUTPUT ──
+Viton:  ${state.stats.byMaterial.Viton || 0} pcs
+Buna:   ${state.stats.byMaterial.Buna || 0} pcs
+EPDM:   ${state.stats.byMaterial.EPDM || 0} pcs
+
+── QUALITY ──
+Splice failures today:    ${todayFails}
+Failure rate:             ${rate}%
+
+── PENDING JOBS ──
+${state.jobs.filter(j=>j.status!=='done').map(j=>`  • ${j.wo} — ${j.material} ${j.size}mm × ${j.qty}pcs [${j.priority.toUpperCase()}]`).join('\n') || '  None remaining.'}`;
+
+  document.getElementById('handoff-auto').textContent = summary;
+}
+
+function submitHandoff() {
+  const notes = document.getElementById('handoff-notes').value.trim();
+  const auto = document.getElementById('handoff-auto').textContent;
+  const now = new Date();
+
+  state.handoffHistory.unshift({
+    date: now.toLocaleDateString('en-CA'),
+    time: now.toLocaleTimeString('en-CA', { hour:'2-digit', minute:'2-digit' }),
+    body: auto + (notes ? `\n\n── TECH NOTES ──\n${notes}` : '')
+  });
+
+  renderHandoffHistory();
+  document.getElementById('handoff-notes').value = '';
+  notify('Shift handoff submitted', 'success');
+  saveState();
+}
+
+function renderHandoffHistory() {
+  const el = document.getElementById('handoff-history');
+  if (!state.handoffHistory.length) {
+    el.innerHTML = '<div style="font-family:var(--font-mono);font-size:11px;color:var(--text3);text-align:center;padding:32px;">No previous handoffs on record.</div>';
+    return;
+  }
+  el.innerHTML = state.handoffHistory.map(h => `
+    <div class="handoff-entry">
+      <div class="handoff-meta">${h.date} · ${h.time} · DAY SHIFT</div>
+      <div class="handoff-body">${h.body}</div>
+    </div>
+  `).join('');
+}
+
+function printHandoff() {
+  const content = document.getElementById('handoff-auto').textContent + '\n\nNOTES:\n' + document.getElementById('handoff-notes').value;
+  const w = window.open('', '_blank');
+  w.document.write(`<pre style="font-family:monospace;font-size:12px;padding:20px;">${content}</pre>`);
+  w.print();
+}
+
+// ============================================================
+// INIT
+// ============================================================
+loadState();
+initInventory();
+renderCalcHistory();
+renderHandoffHistory();
+renderScrap();
+updateDashboard();
+
+// Click outside modal to close
+document.querySelectorAll('.modal-overlay').forEach(el => {
+  el.addEventListener('click', function(e) {
+    if (e.target === this) this.classList.remove('open');
+  });
+});
+</script>
+</body>
+</html>
